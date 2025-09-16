@@ -571,7 +571,8 @@ async function renderStudentHomeworks(user) {
 
   container.innerHTML = "<p>Loading homeworks...</p>";
 
-  const groupId = user.fields.Group?.[0]; // Fixed: match your actual group field
+  // ✅ Correct field for student's group
+  const groupId = user.fields.Group?.[0];
   if (!groupId) {
     container.innerHTML = `<p>No group linked to your account</p>`;
     return;
@@ -615,15 +616,14 @@ async function renderStudentHomeworks(user) {
 
     const today = new Date();
 
-    // Render cards
+    // Render collapsed cards
     container.innerHTML = `
       <div class="homework-grid">
         ${homeworks.map(hw => {
           const dueDate = hw.fields["Due Date"] || '';
           const dueTxt = dueDate ? new Date(dueDate).toLocaleDateString() : '-';
           const isExpired = dueDate && new Date(dueDate) < today;
-          const attachments = hw.fields.Attachments || [];
-          const attachmentsSafe = encodeURIComponent(JSON.stringify(attachments));
+          const attachmentsSafe = encodeURIComponent(JSON.stringify(hw.fields.Attachments || []));
 
           return `
             <div class="cue-card" data-hwid="${hw.id}" data-desc="${hw.fields.Description || 'No full description'}" data-attachments="${attachmentsSafe}">
@@ -643,7 +643,7 @@ async function renderStudentHomeworks(user) {
       </div>
     `;
 
-    // Attach click listener for View buttons
+    // Attach click listeners to all View buttons
     container.querySelectorAll(".cue-card .view-btn").forEach(btn => {
       btn.addEventListener("click", e => {
         const card = e.target.closest(".cue-card");
@@ -699,7 +699,7 @@ function expandHomework(card) {
     attachmentsContainer.innerHTML = '<p>No attachments</p>';
   }
 
-  // Back button to collapse
+  // Back button
   contentEl.querySelector(".back-btn").addEventListener("click", collapseHomework);
 }
 
@@ -713,9 +713,6 @@ function collapseHomework() {
 
   // Restore original collapsed content
   const desc = expandedCard.dataset.desc;
-  const attachmentsSafe = expandedCard.dataset.attachments;
-  const attachments = JSON.parse(decodeURIComponent(attachmentsSafe));
-
   const contentEl = expandedCard.querySelector(".cue-card-content");
   const dueTxt = expandedCard.querySelector('.meta span:nth-child(2)').textContent;
   const statusEl = expandedCard.querySelector('.status');
