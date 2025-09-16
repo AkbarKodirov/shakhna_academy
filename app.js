@@ -571,7 +571,7 @@ async function renderStudentHomeworks(user) {
 
   container.innerHTML = "<p>Loading homeworks...</p>";
 
-  const groupId = user.fields.groupId?.[0];
+  const groupId = user.fields.Group?.[0]; // Fixed: match your actual group field
   if (!groupId) {
     container.innerHTML = `<p>No group linked to your account</p>`;
     return;
@@ -600,8 +600,7 @@ async function renderStudentHomeworks(user) {
           `https://api.airtable.com/v0/${window.SH_CONFIG.AIRTABLE_BASE_ID}/${window.SH_CONFIG.HOMEWORKS_TABLE}/${id}`,
           { headers: { Authorization: `Bearer ${window.SH_CONFIG.AIRTABLE_TOKEN}` } }
         );
-        if (!res.ok) return null;
-        return res.json();
+        return res.ok ? res.json() : null;
       })
     );
 
@@ -637,7 +636,6 @@ async function renderStudentHomeworks(user) {
                   <span class="status ${isExpired ? 'expired' : 'active'}">${isExpired ? 'Overdue' : 'Active'}</span>
                 </div>
                 <button class="view-btn">View</button>
-                <div class="attachmentsContainer" style="margin-top:10px;"></div>
               </div>
             </div>
           `;
@@ -645,7 +643,7 @@ async function renderStudentHomeworks(user) {
       </div>
     `;
 
-    // Add click listeners for View buttons
+    // Attach click listener for View buttons
     container.querySelectorAll(".cue-card .view-btn").forEach(btn => {
       btn.addEventListener("click", e => {
         const card = e.target.closest(".cue-card");
@@ -661,8 +659,7 @@ async function renderStudentHomeworks(user) {
 
 // === Expand Homework ===
 function expandHomework(card) {
-  collapseHomework(); // Collapse any previously expanded
-
+  collapseHomework(); // Collapse any expanded card first
   card.classList.add("expanded");
 
   // Hide other cards
@@ -678,35 +675,16 @@ function expandHomework(card) {
     console.error("Failed to parse attachments:", e);
   }
 
-  const container = card.querySelector(".attachmentsContainer");
-  container.innerHTML = '';
-
-  if (attachments.length > 0) {
-    attachments.forEach(file => {
-      const link = document.createElement('a');
-      link.href = file.url;
-      link.target = "_blank";
-      link.textContent = file.filename;
-      link.style.display = "block";
-      container.appendChild(link);
-    });
-  } else {
-    container.innerHTML = '<p>No attachments</p>';
-  }
-
-  // Replace content with full description + Back button
   const contentEl = card.querySelector(".cue-card-content");
   const metaEl = contentEl.querySelector(".meta").outerHTML;
+
   contentEl.innerHTML = `
     <p>${fullDesc}</p>
     ${metaEl}
     <div class="attachmentsContainer" style="margin-top:10px;"></div>
     <button class="back-btn">← Back</button>
   `;
-  const backBtn = contentEl.querySelector(".back-btn");
-  backBtn.addEventListener("click", collapseHomework);
 
-  // Re-add attachments
   const attachmentsContainer = contentEl.querySelector(".attachmentsContainer");
   if (attachments.length > 0) {
     attachments.forEach(file => {
@@ -720,6 +698,9 @@ function expandHomework(card) {
   } else {
     attachmentsContainer.innerHTML = '<p>No attachments</p>';
   }
+
+  // Back button to collapse
+  contentEl.querySelector(".back-btn").addEventListener("click", collapseHomework);
 }
 
 // === Collapse Homework ===
@@ -730,7 +711,7 @@ function collapseHomework() {
   expandedCard.classList.remove('expanded');
   document.querySelectorAll('.cue-card').forEach(c => c.classList.remove('hidden'));
 
-  // Re-render original card content
+  // Restore original collapsed content
   const desc = expandedCard.dataset.desc;
   const attachmentsSafe = expandedCard.dataset.attachments;
   const attachments = JSON.parse(decodeURIComponent(attachmentsSafe));
@@ -749,29 +730,14 @@ function collapseHomework() {
       <span class="status ${statusClass}">${statusText}</span>
     </div>
     <button class="view-btn">View</button>
-    <div class="attachmentsContainer" style="margin-top:10px;"></div>
   `;
 
-  // Reattach click for View button
-  contentEl.querySelector('.view-btn').addEventListener('click', e => {
+  // Reattach View button
+  contentEl.querySelector(".view-btn").addEventListener("click", e => {
     expandHomework(expandedCard);
   });
-
-  // Reattach attachments
-  const attachmentsContainer = contentEl.querySelector(".attachmentsContainer");
-  if (attachments.length > 0) {
-    attachments.forEach(file => {
-      const link = document.createElement('a');
-      link.href = file.url;
-      link.target = "_blank";
-      link.textContent = file.filename;
-      link.style.display = "block";
-      attachmentsContainer.appendChild(link);
-    });
-  } else {
-    attachmentsContainer.innerHTML = '<p>No attachments</p>';
-  }
 }
+
 
   // === Render Student Tests ===
   async function renderStudentTests(user) {
