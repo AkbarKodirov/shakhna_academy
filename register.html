@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Shakhna Academy</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><span class="logo">🎓</span> Shakhna Academy</div>
+  </div>
+
+  <div class="container grid-two">
+    <div class="card auth">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <label>Email <input type="email" id="regEmail" required></label>
+        <label>Password <input type="password" id="regPassword" required></label>
+        <button type="submit" class="primary">Register</button>
+      </form>
+      <div id="regMsg" class="msg"></div>
+      <p>Already have an account? <a href="login.html">Log in</a></p>
+    </div>
+
+    <div class="card preview">
+      <h3>Preview</h3>
+      <img src="preview.png" alt="Shakhna Academy Preview" width="100%"> <!-- Replace with your image path if different -->
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+      const success = await app.register({email, password});
+      const msgEl = document.getElementById('regMsg');
+      if(success) msgEl.textContent = 'Registered! Redirecting...';
+      else msgEl.textContent = 'Registration failed. Try again.';
+    });
+  </script>
+</body>
+</html>

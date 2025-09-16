@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - Shakhna Academy</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Payments table styling */
+    #studentPayments td {
+      padding: 8px;
+      text-align: center;
+    }
+    .paid {
+      color: green;
+      font-weight: bold;
+    }
+    .unpaid {
+      color: red;
+      font-weight: bold;
+    }
+    .future {
+      color: #777;
+    }
+
+    /* Buttons */
+    .primary-btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .primary-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="brand"><span class="logo">🎓</span> Shakhna Academy</div>
+    <div class="nav-links">
+      <a href="#payments" class="nav-link">Payments</a>
+      <a href="#my-homework" class="nav-link">My Homework</a>
+      <a href="#tests" class="nav-link">Tests</a>
+      <button onclick="app.logout()" class="cta">Logout</button>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+
+    <!-- Home Section -->
+    <div id="home" class="section">
+      <h1>Welcome, <span id="userName"></span>!</h1>
+      <p>Check your homework, payments, and upcoming tests all in one place.</p>
+    </div>
+
+    <!-- Payments Section -->
+    <div id="payments" class="section" style="display:none;">
+      <div class="card">
+        <h2>Payment Status</h2>
+        <table id="studentPayments" class="table">
+          <thead>
+            <tr><th>Month</th><th>Status</th><th>Due Date</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- My Homework Section -->
+   <!-- My Homework Section -->
+<div id="my-homework" class="section" style="display:none;">
+  <div class="card">
+    <h2>My Homework</h2>
+    <div id="hwContainer"></div> <!-- ✅ Changed from table to container -->
+  </div>
+</div>
+
+
+    <!-- Tests Section -->
+    <div id="tests" class="section" style="display:none;">
+      <div class="card">
+        <h2>Upcoming Tests</h2>
+        <table id="testsTable" class="table">
+          <thead><tr><th>Title</th><th>Due Date</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let homeShown = false;
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(sec => {
+        if(sectionId === 'home' && homeShown) {
+          sec.style.display = 'none';
+        } else {
+          sec.style.display = sec.id === sectionId ? 'block' : 'none';
+        }
+      });
+      if(sectionId === 'home') homeShown = true;
+    }
+
+    async function init() {
+      app.protectRoute();
+      const user = await app.getCurrentUser();
+      if(user) {
+        document.getElementById('userName').textContent = user.fields.Name || 'Student';
+        await app.renderStudentPayments(user);
+        await app.renderStudentHomeworks(user);
+        await app.renderStudentTests(user);
+        showSection('home');
+      }
+    }
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const sectionId = link.href.split('#')[1];
+        showSection(sectionId);
+      });
+    });
+
+    init();
+  </script>
+</body>
+</html>

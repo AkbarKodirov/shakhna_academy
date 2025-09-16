@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Panel - Shakhna Academy</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><span class="logo">🎓</span> Shakhna Academy</div>
+    <div class="nav-links">
+      <!-- Inside teacher.html topbar nav-links -->
+      <a href="#" class="nav-link" id="testsNav">Assign Tests</a>
+      <a href="#groups" class="nav-link">Groups</a>
+      <a href="#payments" class="nav-link">Payments</a>
+      <a href="#assign-homework" class="nav-link">Assign Homework</a>
+      <button onclick="app.logout()" class="cta">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Home -->
+    <div id="home" class="section">
+      <h1>Welcome back, <span id="userName"></span>!</h1>
+      <p>Effortlessly manage homework, attendance, and payments in one place</p>
+    </div>
+
+    <!-- Groups -->
+    <div id="groups" class="section" style="display: none;">
+      <div class="card">
+        <h2>Groups</h2>
+        <ul id="groupsList" class="table"></ul>
+      </div>
+      <div class="card auth" id="studentsCard" style="display: none;">
+        <h2>Students in Selected Group</h2>
+        <table id="studentsTable" class="table">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payments -->
+    <div id="payments" class="section" style="display: none;">
+  <div class="card">
+    <h2>Payments</h2>
+    <input type="text" id="paymentSearch" placeholder="Search by student name..." class="search-bar">
+
+    <table id="paymentsTable" class="table">
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Sep</th>
+          <th>Oct</th>
+          <th>Nov</th>
+          <th>Dec</th>
+          <th>Jan</th>
+          <th>Feb</th>
+          <th>Mar</th>
+          <th>Apr</th>
+          <th>May</th>
+          <th>Jun</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+
+    <!-- Assign Homework -->
+    <div id="assign-homework" class="section" style="display: none;">
+      <div class="card">
+        <h2>Assign Homework</h2>
+        <div class="split-columns">
+          <!-- Recent Homework -->
+          <div class="column">
+            <h3>Recently Assigned</h3>
+            <ul id="recentHomeworkList" class="table"></ul>
+          </div>
+
+          <!-- Assign New -->
+          <div class="column">
+            <h3>Assign New Homework</h3>
+            <form id="hwForm">
+              <label>Title <input type="text" id="hwTitle" required></label>
+              <label>Details <textarea id="hwDetails" required></textarea></label>
+              <label>Assign to Group
+                <select id="hwGroup" required>
+                  <option value="">Select a group</option>
+                </select>
+              </label>
+              <!-- In the #assign-homework section, update the file input -->
+<label>Upload Files (Optional) <input type="file" id="hwFile" multiple accept=".pdf,.html"></label>
+              <label>Deadline <input type="date" id="hwDue" required></label>
+              <button type="submit" class="primary">Assign Homework</button>
+            </form>
+            <div id="hwMsg" class="msg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tests Panel -->
+<div id="testsPanel" class="container" style="display:none;">
+  <div class="assign-tests-container">
+    <h2>Assigned Tests</h2>
+
+    <!-- Grid for all uploaded tests -->
+    <div id="testsGrid" class="tests-grid"></div>
+
+    <!-- Floating Assign Button -->
+    <button id="assignTestBtn" class="assign-btn">+ Assign Test</button>
+  </div>
+
+  <!-- Assign Test Modal -->
+  <div id="assignModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Assign New Test</h3>
+
+      <form id="assignTestForm">
+        <label>Test Title</label>
+        <input type="text" id="testTitle" required />
+
+        <label>Select Test</label>
+<select id="testSelect" required>
+  <option value="">Loading available tests...</option>
+</select>
+
+        <label>Group</label>
+        <select id="testGroup" required></select>
+
+        <label>Due Date</label>
+        <input type="date" id="testDue" required />
+
+        <button type="submit" class="save-btn">Save Test</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 📌 Hidden Statistics Modal -->
+  <div id="statsModal" class="modal">
+    <div class="modal-content stats-box">
+      <span class="close">&times;</span>
+      <h3>Test Statistics</h3>
+      <div id="statsContent">
+        <p>Loading statistics...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const cfg = {
+      API_KEY: window.SH_CONFIG.AIRTABLE_TOKEN,
+      BASE_ID: window.SH_CONFIG.AIRTABLE_BASE_ID,
+      USERS_TABLE: window.SH_CONFIG.USERS_TABLE,
+      HOMEWORKS_TABLE: window.SH_CONFIG.HOMEWORKS_TABLE,
+      GROUPS_TABLE: window.SH_CONFIG.GROUPS_TABLE,
+      PAYMENTS_TABLE: window.SH_CONFIG.PAYMENTS_TABLE
+    };
+
+    // Init Teacher Panel
+    async function init() {
+      app.protectRoute();
+      const user = await app.getCurrentUser();
+      if (user?.fields.Role?.toLowerCase() === 'teacher') {
+        document.getElementById('userName').textContent = user.fields.Name || 'Teacher';
+        await renderGroups();
+        await renderPayments();
+        await renderRecentHomework();
+        showSection('home');
+      } else {
+        window.location.href = 'dashboard.html';
+      }
+    }
+    init();
+
+    // Section Toggle
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(sec => {
+        sec.style.display = sec.id === sectionId ? 'block' : 'none';
+      });
+    }
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', async e => {
+        e.preventDefault();
+        const sectionId = link.href.split('#')[1];
+        showSection(sectionId);
+        if (sectionId === "assign-homework") {
+          await app.renderGroupOptions();
+        }
+      });
+    });
+
+    // Render Groups
+      // Render Groups
+  async function renderGroups() {
+    const groups = await app.airtableList(cfg.GROUPS_TABLE);
+    const ul = document.getElementById('groupsList');
+    ul.innerHTML = ''; // Clear existing content
+
+    groups.forEach(group => {
+      const li = document.createElement('li');
+      li.classList.add('table-row');
+      li.dataset.groupId = group.id;
+      li.innerHTML = `<span style="font-weight:600; cursor:pointer;">${group.fields.Name || 'Unnamed Group'}</span>`;
+      ul.appendChild(li);
+
+      // Add expandable detail row
+      const detailDiv = document.createElement('div');
+      detailDiv.classList.add('group-detail-row');
+      detailDiv.style.display = 'none';
+      detailDiv.innerHTML = `
+        <div class="detail-container" style="padding:10px;">
+          <p><strong>Start Date:</strong> ${group.fields['Start Date'] || 'Not set'}</p>
+          <p><strong>Number of Students:</strong> <span id="studentCount_${group.id}">Loading...</span></p>
+          <ul id="studentsList_${group.id}" style="display:none; margin-top:10px; list-style-type:none;"></ul>
+          <button class="toggle-students-btn" data-group="${group.id}">Show Students</button>
+        </div>
+      `;
+      ul.appendChild(detailDiv);
+
+      // Toggle detail row on click
+      li.addEventListener('click', () => {
+        const isVisible = detailDiv.style.display === 'block';
+        detailDiv.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) {
+          updateGroupDetails(group.id, detailDiv);
+        }
+      });
+    });
+
+    // Populate homework dropdown
+    const select = document.getElementById('hwGroup');
+    select.innerHTML = '<option value="">Select a group</option>' + groups.map(g => `<option value="${g.id}">${g.fields.Name || 'Unnamed Group'}</option>`).join('');
+  }
+
+  async function updateGroupDetails(groupId, detailDiv) {
+  try {
+    // Get the group record with linked students
+    const groupRecord = await app.airtableList(cfg.GROUPS_TABLE, `RECORD_ID()="${groupId}"`);
+    const group = groupRecord[0];
+
+    // Get linked student IDs from "Users" field in Groups table
+    const linkedStudentIds = group.fields.Users || [];
+
+    const studentCountSpan = detailDiv.querySelector(`#studentCount_${groupId}`);
+    const studentsList = detailDiv.querySelector(`#studentsList_${groupId}`);
+    const toggleBtn = detailDiv.querySelector('.toggle-students-btn');
+
+    // Update total student count
+    studentCountSpan.textContent = linkedStudentIds.length;
+
+    if (linkedStudentIds.length > 0) {
+      // Fetch full student records by their record IDs
+      const students = await Promise.all(
+        linkedStudentIds.map(async id => {
+          const student = await app.airtableList(cfg.USERS_TABLE, `RECORD_ID()="${id}"`);
+          return student[0]?.fields?.Name || "Unnamed Student";
+        })
+      );
+
+      // Render student names
+      studentsList.innerHTML = students
+        .map(name => `<li class="student-card">${name}</li>`)
+        .join('');
+      studentsList.style.display = 'none';
+    } else {
+      // No students linked
+      studentsList.innerHTML = `<li class="no-students">No students found in this group.</li>`;
+      studentsList.style.display = 'none';
+    }
+
+    // Button toggle logic
+    let isVisible = false;
+    toggleBtn.textContent = 'Show Students';
+    toggleBtn.addEventListener('click', () => {
+      isVisible = !isVisible;
+      studentsList.style.display = isVisible ? 'block' : 'none';
+      toggleBtn.textContent = isVisible ? 'Hide Students' : 'Show Students';
+    });
+
+  } catch (error) {
+    console.error(`❌ Error fetching students for group ${groupId}:`, error);
+    const studentsList = detailDiv.querySelector(`#studentsList_${groupId}`);
+    studentsList.innerHTML = `<li class="error">Error loading students. Check console.</li>`;
+    studentsList.style.display = 'block';
+  }
+}
+
+
+  
+// Render Payments Table (September → June) — robust version
+async function renderPayments() {
+  const students = await app.airtableList(cfg.USERS_TABLE);
+  const payments = await app.airtableList(cfg.PAYMENTS_TABLE);
+  const groups = await app.airtableList(cfg.GROUPS_TABLE);
+  const tbody = document.getElementById('paymentsTable').querySelector('tbody');
+  const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+  const today = new Date(); // 05:32 AM +05, September 08, 2025
+
+  tbody.innerHTML = '';
+
+  students
+    .filter(s => s.fields.Role?.toLowerCase() === 'student')
+    .forEach(student => {
+      const studentId = student.id;
+      const studentName = student.fields.Name || 'Unnamed Student';
+      const studentGroupId = student.fields.Group?.[0]; // Linked field to GROUPS_TABLE
+      const group = groups.find(g => g.id === studentGroupId);
+
+      let groupStartDate = group && group.fields['Start Date'] ? new Date(group.fields['Start Date']) : new Date('2025-09-03');
+      if (isNaN(groupStartDate.getTime())) {
+        console.warn(`Invalid or missing Start Date for group ${group?.id || 'unknown'}: ${group?.fields['Start Date'] || 'null'}, using fallback 2025-09-03`);
+        groupStartDate = new Date('2025-09-03');
+      }
+
+      const tr = document.createElement('tr');
+      tr.classList.add('student-row');
+
+      tr.innerHTML = `<td style="font-weight:600; cursor:pointer;">${studentName}</td>` +
+        months.map((month, index) => {
+          let dueDate = new Date(groupStartDate);
+          dueDate.setMonth(dueDate.getMonth() + index);
+
+          const payment = payments.find(p =>
+            p.fields.Student?.[0] === studentId &&
+            p.fields.Month?.trim().toLowerCase() === month.toLowerCase()
+          );
+
+          if (payment && payment.fields.Status === 'Paid') {
+            return `<td style="text-align:center; color:green; font-weight:bold;">✅ Paid</td>`;
+          } else if (!payment && today > dueDate) {
+            return `<td style="text-align:center; color:red; font-weight:bold;">❌ Unpaid</td>`;
+          } else {
+            return `<td style="text-align:center;">-</td>`;
+          }
+        }).join('');
+
+      tbody.appendChild(tr);
+
+      // Expandable Cue Cards
+      const detailTr = document.createElement('tr');
+      detailTr.classList.add('detail-row');
+      detailTr.style.display = 'none';
+      detailTr.innerHTML = `<td colspan="${months.length + 1}" style="padding:10px;">
+        <div class="detail-container"></div>
+      </td>`;
+      tbody.appendChild(detailTr);
+
+      tr.querySelector('td').addEventListener('click', () => {
+        detailTr.style.display = detailTr.style.display === 'none' ? 'table-row' : 'none';
+        const container = detailTr.querySelector('.detail-container');
+
+        container.innerHTML = `<div class="payments-grid">
+          ${months.map((month, index) => {
+            let dueDate = new Date(groupStartDate);
+            dueDate.setMonth(dueDate.getMonth() + index);
+
+            const payment = payments.find(p =>
+              p.fields.Student?.[0] === studentId &&
+              p.fields.Month?.trim().toLowerCase() === month.toLowerCase()
+            );
+
+            let statusText = '';
+            if (payment && payment.fields.Status === 'Paid') statusText = '✅ Paid';
+            else if (!payment && today > dueDate) statusText = '❌ Unpaid';
+
+            const type = payment?.fields['Payment Type'] || '-';
+            const date = payment?.fields['Payment Date'] ? new Date(payment.fields['Payment Date']).toISOString().split('T')[0] : '-';
+            let due = dueDate ? dueDate.toISOString().split('T')[0] : '-';
+
+            if (payment && payment.fields.Status === 'Paid') {
+              const lastDueDate = payment.fields['Due Date'] ? new Date(payment.fields['Due Date']) : dueDate;
+              if (isNaN(lastDueDate.getTime())) {
+                dueDate = new Date(dueDate.getTime() + index * 30 * 24 * 60 * 60 * 1000);
+              } else {
+                dueDate = new Date(lastDueDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+              }
+              due = dueDate.toISOString().split('T')[0];
+            }
+
+            return `<div class="payment-card">
+                      <div class="month">${month}</div>
+                      <div class="status">${statusText}</div>
+                      <div class="type">Type: ${type}</div>
+                      <div class="paid-on">Paid on: ${date}</div>
+                      <div class="due">Due: ${due}</div>
+                      ${statusText !== '✅ Paid' ? `<button class="update-payment-btn" data-student="${studentId}" data-month="${month}">Update Payment</button>` : ''}
+                    </div>`;
+          }).join('')}
+        </div>`;
+
+        container.querySelectorAll('.update-payment-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const month = btn.dataset.month;
+            const studentId = btn.dataset.student;
+            const paymentType = prompt(`Enter payment type for ${month}: Cash / Credit Card / Other`);
+            const paymentDate = prompt(`Enter payment date for ${month} (YYYY-MM-DD)`);
+
+            if (!paymentType || !paymentDate) {
+              alert('Payment type and date are required!');
+              return;
+            }
+
+            const monthIndex = months.indexOf(month);
+            let dueDate = new Date(groupStartDate);
+            dueDate.setMonth(dueDate.getMonth() + monthIndex);
+
+            const lastPayment = payments
+              .filter(p => p.fields.Student?.[0] === studentId && p.fields.Status === 'Paid')
+              .sort((a, b) => new Date(b.fields['Due Date']) - new Date(a.fields['Due Date']))[0];
+            if (lastPayment && !isNaN(new Date(lastPayment.fields['Due Date']).getTime())) {
+              dueDate = new Date(new Date(lastPayment.fields['Due Date']).getTime() + 30 * 24 * 60 * 60 * 1000);
+            }
+
+            const existingPayment = payments.find(p =>
+              p.fields.Student?.[0] === studentId &&
+              p.fields.Month?.trim().toLowerCase() === month.toLowerCase()
+            );
+
+            try {
+              if (existingPayment) {
+                await app.updateAirtableRecord(cfg.PAYMENTS_TABLE, existingPayment.id, {
+                  Status: 'Paid',
+                  'Payment Type': paymentType,
+                  'Payment Date': paymentDate,
+                  'Due Date': dueDate.toISOString().split('T')[0]
+                });
+              } else {
+                await app.airtableCreate(cfg.PAYMENTS_TABLE, {
+                  Student: [studentId],
+                  Month: month,
+                  Status: 'Paid',
+                  'Payment Type': paymentType,
+                  'Payment Date': paymentDate,
+                  'Due Date': dueDate.toISOString().split('T')[0]
+                });
+              }
+            } catch (err) {
+              alert('Failed to update payment. Check console.');
+              console.error(err);
+            }
+
+            await renderPayments();
+          });
+        });
+      });
+    });
+
+  document.getElementById('paymentSearch').addEventListener('input', e => {
+    const term = e.target.value.toLowerCase();
+    tbody.querySelectorAll('.student-row').forEach(row => {
+      const name = row.cells[0].textContent.toLowerCase();
+      row.style.display = name.includes(term) ? '' : 'none';
+      if (row.nextElementSibling?.classList.contains('detail-row')) {
+        row.nextElementSibling.style.display = 'none';
+      }
+    });
+  });
+}
+
+
+
+    // Render Recent Homework
+  async function renderRecentHomework() {
+  try {
+    const homeworks = await app.airtableList(cfg.HOMEWORKS_TABLE);
+    const groups = await app.airtableList(cfg.GROUPS_TABLE);
+
+    homeworks.sort((a, b) => new Date(b.createdTime) - new Date(a.createdTime));
+
+    const ul = document.getElementById("recentHomeworkList");
+    ul.innerHTML = "";
+
+    if (homeworks.length === 0) {
+      ul.innerHTML = `<li class="table-row">No homework assigned yet.</li>`;
+      return;
+    }
+
+    homeworks.forEach(hw => {
+      const hwId = hw.id;
+      const title = hw.fields.Title || "Untitled";
+      const description = hw.fields.Description || "No description provided";
+      const due = hw.fields["Due Date"] || "-";
+      const groupId = hw.fields.groupId?.[0];
+      const groupName = groups.find(g => g.id === groupId)?.fields.Name || "Unknown Group";
+
+      const files = hw.fields.Attachments || [];
+      const fileLinks = files.map(f => `<a href="${f.url}" target="_blank">${f.filename}</a>`).join("<br>") || "No file uploaded";
+
+      const li = document.createElement("li");
+      li.classList.add("table-row", "homework-row");
+      li.style.cursor = "pointer";
+      li.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:600;">${title}</span>
+          <span style="font-size:12px; color:#666;">Due: ${due}</span>
+        </div>
+      `;
+
+      const detailDiv = document.createElement("div");
+      detailDiv.classList.add("homework-detail");
+      detailDiv.style.display = "none";
+      detailDiv.style.marginTop = "8px";
+      detailDiv.style.padding = "10px";
+      detailDiv.style.border = "1px solid #ddd";
+      detailDiv.style.borderRadius = "6px";
+      detailDiv.style.backgroundColor = "#f9f9f9";
+      detailDiv.innerHTML = `
+        <p><strong>Description:</strong> ${description}</p>
+        <p><strong>Assigned Group:</strong> ${groupName}</p>
+        <p><strong>Due Date:</strong> ${due}</p>
+        <p><strong>Files:</strong><br>${fileLinks}</p>
+      `;
+
+      li.appendChild(detailDiv);
+      ul.appendChild(li);
+
+      li.addEventListener("click", () => {
+        const isVisible = detailDiv.style.display === "block";
+        document.querySelectorAll(".homework-detail").forEach(div => (div.style.display = "none"));
+        detailDiv.style.display = isVisible ? "none" : "block";
+      });
+    });
+
+  } catch (err) {
+    console.error("❌ Failed to render recent homework:", err);
+    document.getElementById("recentHomeworkList").innerHTML =
+      `<li class="table-row" style="color:red;">Failed to load recent homework</li>`;
+  }
+}
+   document.getElementById('hwForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msgEl = document.getElementById('hwMsg');
+  msgEl.textContent = "⏳ Assigning homework...";
+
+  const title = document.getElementById('hwTitle').value.trim();
+  const description = document.getElementById('hwDetails').value.trim();
+  const groupId = document.getElementById('hwGroup').value;
+  const due_date = document.getElementById('hwDue').value;
+  const files = document.getElementById('hwFile').files;
+
+  if (!title || !groupId || !due_date) {
+    msgEl.textContent = "⚠️ Please fill in all required fields.";
+    return;
+  }
+
+  try {
+    let attachments = [];
+
+   if (files.length > 0) {
+  msgEl.textContent = "⏳ Uploading files...";
+  for (let i = 0; i < files.length; i++) {
+    const formData = new FormData();
+    formData.append('file', files[i]);
+    formData.append('upload_preset', 'homework_upload'); // ✅ Unsigned preset
+
+    const res = await fetch('https://api.cloudinary.com/v1_1/dxouurt3f/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    console.log("Cloudinary upload result:", data); // ✅ check response in F12 console
+
+attachments.push({ url: data.secure_url }); // ✅ Airtable only wants url
+  }
+}
+
+
+    // Build JSON payload
+    const fields = {
+  Title: title,
+  Description: description,
+  "Due Date": due_date,
+  groupId: [groupId],
+  Attachments: attachments.map(file => ({ url: file.url })) // ✅ only url
+};
+
+
+    const response = await fetch(
+      `https://api.airtable.com/v0/${cfg.BASE_ID}/${encodeURIComponent(cfg.HOMEWORKS_TABLE)}`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${cfg.API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ fields })
+      }
+    );
+
+    const result = await response.json();
+    if (!response.ok) {
+      console.error("Airtable error:", result);
+      msgEl.textContent = `❌ Failed: ${result.error?.message}`;
+      return;
+    }
+
+    msgEl.textContent = "✅ Homework assigned successfully!";
+    document.getElementById("hwForm").reset();
+    await renderRecentHomework();
+  } catch (err) {
+    console.error("Unexpected Assign Error:", err);
+    msgEl.textContent = `❌ Unexpected error: ${err.message}`;
+  }
+});
+
+
+
+  </script>
+</body>
+</html>

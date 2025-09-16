@@ -1,0 +1,895 @@
+
+/* Simple clean style inspired by the provided design */
+:root{
+  --blue:#2f7be2;
+  --muted:#6b7280;
+  --card-bg:#fff;
+  --radius:12px;
+  --container:1100px;
+}
+*{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+body{background:#f3f6fb;margin:0;color:#111;}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:var(--blue);color:#fff;border-radius:0 0 8px 8px;box-shadow:0 6px 18px rgba(47,123,226,0.12);}
+.brand{font-weight:700;font-size:18px;display:flex;align-items:center;gap:10px}
+.logo{display:inline-block;width:36px;height:36px;background:#fff;border-radius:8px;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700}
+.container{max-width:var(--container);margin:28px auto;padding:0 18px;}
+.card{background:var(--card-bg);padding:22px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:18px;}
+.grid-two{display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
+.auth label{display:block;margin:10px 0}
+.auth input, .auth textarea, .card input, .card textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef9;background:#fbfdff}
+.primary{display:inline-block;padding:12px 20px;background:var(--blue);color:#fff;border:none;border-radius:10px;cursor:pointer;margin-top:10px}
+.cta{display:inline-block;padding:12px 16px;background:var(--blue);color:#fff;border-radius:10px;text-decoration:none}
+.foot{text-align:center;padding:24px;color:var(--muted);font-size:14px}
+.features{display:flex;gap:18px}
+.half{flex:1}
+.table{width:100%;border-collapse:collapse;margin-top:10px}
+.table th, .table td{padding:12px;border-bottom:1px solid #eef3fb;text-align:left}
+.msg{color:var(--muted);margin-top:10px}
+.checkbox{display:flex;align-items:center;gap:8px}
+.preview img{border-radius:8px;box-shadow:0 8px 20px rgba(15,23,42,0.08)}
+.user{color:#fff;font-weight:600}
+@media(max-width:900px){.grid-two{grid-template-columns:1fr;}.topbar{flex-direction:row}}
+/* Enhance existing styles for new layout */
+.header .sign-in:hover {
+  background: #e0e7ff;
+}
+.welcome {
+  max-width: var(--container);
+  margin: 0 auto;
+}
+.program-card:hover {
+  background: #e0e7ff;
+  transition: background 0.3s;
+}
+/* Align with new index.html layout */
+.topbar {
+  border-radius: 0;
+  box-shadow: none;
+}
+.container {
+  padding: 0;
+}
+.table-row {
+  display: flex;
+  padding: 12px;
+  border-bottom: 1px solid #eef3fb;
+  cursor: pointer;
+}
+.table-row:hover {
+  background: #fbfdff;
+}
+/* ============= NEW TEACHER DASHBOARD STYLES ============= */
+
+/* Top navigation links */
+.nav-links {
+  display: flex;
+  gap: 16px;
+  margin-right: 16px;
+}
+.nav-link {
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Welcome message */
+.welcome {
+  font-weight: 600;
+  font-size: 15px;
+  margin-right: 12px;
+  color: #fff;
+}
+
+/* Homework Section Layout */
+.homework-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.hw-left, .hw-right {
+  background: var(--card-bg);
+  padding: 16px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+/* Search box for Payments */
+.search-box {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e6eef9;
+  margin-bottom: 15px;
+}
+
+/* Payments Table */
+.table-wrapper {
+  overflow-x: auto;
+}
+.table th {
+  background-color: #f3f6fb;
+  font-weight: bold;
+  text-align: center;
+}
+.table td {
+  text-align: center;
+  cursor: pointer;
+}
+.table td.paid {
+  color: #28a745;
+  font-weight: 600;
+}
+.table td.unpaid {
+  color: #e63946;
+  font-weight: 600;
+}
+.table td.paid:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+.logout-btn {
+  background: #e63946;
+}
+.logout-btn:hover {
+  background: #c92334;
+}
+/* Split columns for Assign Homework section */
+.split-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 20px; /* Space between columns */
+  margin-top: 15px;
+}
+
+.column {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.column h3 {
+  margin-bottom: 10px;
+  color: #2b6cb0;
+  font-size: 18px;
+}
+
+.column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.column ul li {
+  background: #f8f9fc;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.column form label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: bold;
+  color: #333;
+}
+
+.column form input,
+.column form textarea,
+.column form select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.column form button {
+  margin-top: 12px;
+  padding: 10px;
+  width: 100%;
+  background-color: #2b6cb0;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.column form button:hover {
+  background-color: #1e4e8c;
+}
+
+/* Container for all months */
+.payments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Each month card */
+.payment-card {
+  background: #fff; /* White background */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  color: #000; /* Default text black */
+}
+
+/* Month title */
+.payment-card .month {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+/* Status */
+.payment-card .status {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+/* Other info */
+.payment-card .type,
+.payment-card .paid-on,
+.payment-card .due {
+  margin-bottom: 5px;
+}
+
+/* Update Payment Button */
+.payment-card .update-payment-btn {
+  background-color: #007bff; /* Blue button */
+  color: #fff; /* White text on button */
+  border: none;
+  border-radius: 4px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.payment-card .update-payment-btn:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Tests Table Styling */
+#testsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#testsTable th, #testsTable td {
+  padding: 12px;
+  border-bottom: 1px solid #eaeaea;
+  text-align: left;
+}
+
+#testsTable th {
+  background-color: #f5f7fa;
+  font-weight: bold;
+}
+
+#testsTable tr:hover {
+  background-color: #f1f8ff;
+}
+
+#testsTable button {
+  padding: 6px 12px;
+  background-color: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#testsTable button:hover {
+  background-color: #1c5ecf;
+}
+
+/* Statistics Modal Styling */
+.stats-box {
+  max-width: 500px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+#statsContent {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.stats-list {
+  list-style: none;
+  padding: 0;
+}
+
+.stats-list li {
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Student status colors */
+.completed {
+  color: #1d8f4b;
+  font-weight: bold;
+}
+
+.pending {
+  color: #d92626;
+  font-weight: bold;
+}
+
+/* Modal fade-in animation */
+@keyframes fadeIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ====== Assign Tests (cards + modals) ====== */
+.assign-tests-container { padding: 20px; }
+.assign-tests-container h2 { margin: 0 0 14px; }
+
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.test-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+}
+
+.test-card h4 { margin: 0 0 8px; font-size: 16px; }
+.test-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.status.active { background: #e7f7ee; color: #157c3c; }
+.status.expired { background: #ffe8e8; color: #c62828; }
+
+.test-card .actions {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.view-btn, .save-btn {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.view-btn:hover, .save-btn:hover { opacity: 0.95; transform: translateY(-1px); }
+
+/* floating assign button */
+.assign-btn {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  background: var(--blue);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(47,123,226,0.25);
+  transition: transform .06s ease;
+  z-index: 60;
+}
+.assign-btn:active { transform: translateY(1px); }
+
+/* modal backdrop + panel */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 1000;
+  padding: 24px;
+}
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  max-width: 600px;
+  width: 100%;
+  margin: 64px auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  animation: fadeIn .18s ease;
+  position: relative;
+}
+.modal .close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+  background: none;
+  border: none;
+}
+
+/* modal form controls */
+.modal-content form label { display: block; font-weight: 600; margin: 12px 0 6px; color: #334155; }
+.modal-content input[type="text"],
+.modal-content input[type="url"],
+.modal-content input[type="date"],
+.modal-content select,
+.modal-content input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e6eef9;
+  background: #fbfdff;
+  box-sizing: border-box;
+}
+.modal-content .save-btn { margin-top: 14px; width: 100%; padding: 12px; border-radius: 10px; }
+
+/* statistics UI (summary + list) */
+.stats-box { max-width: 520px; }
+#statsContent { margin-top: 12px; text-align: left; }
+.stats-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
+.summary-chip { background: #f3f6fb; border-radius: 10px; padding: 10px; text-align: center; font-weight: 700; }
+.stats-list { list-style: none; padding: 0; margin: 0; }
+.stats-list li {
+  display: flex; justify-content: space-between;
+  background: #fbfdff; border: 1px solid #eef3fb;
+  border-radius: 8px; padding: 8px 10px; margin-bottom: 8px;
+}
+.completed { color: #157c3c; font-weight: 700; }
+.pending { color: #c62828; font-weight: 700; }
+
+/* responsive */
+@media (max-width: 720px) {
+  .tests-grid { grid-template-columns: 1fr; }
+  .assign-btn { right: 16px; bottom: 16px; padding: 10px 14px; }
+  .modal-content { margin: 18vh auto; width: calc(100% - 32px); }
+  .stats-summary { grid-template-columns: repeat(2,1fr); }
+}
+
+/* small animation */
+@keyframes fadeIn { from { opacity: .7; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Student List Styling */
+#groupsList .group-detail-row {
+  padding: 12px;
+  background-color: #f8faff;
+  border-radius: 8px;
+  margin: 10px 0;
+  border: 1px solid #e3e8ff;
+}
+
+/* Student Card */
+.student-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e6ff;
+  padding: 8px 12px;
+  margin: 6px 0;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #222;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.student-card:hover {
+  background-color: #f1f5ff;
+}
+
+/* No Students Text */
+.no-students {
+  color: #888;
+  padding: 6px;
+}
+
+/* Blue Toggle Button */
+.toggle-students-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.toggle-students-btn:hover {
+  background-color: #0056cc;
+}
+
+/* Homework Card Styling */
+  .homework-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 16px;
+    margin: 12px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); /* Cue card gradient */
+  }
+
+  .homework-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .homework-meta span {
+    line-height: 1.4;
+  }
+
+  .status.expired {
+    font-weight: bold;
+    color: #dc3545;
+  }
+
+  .status.active {
+    font-weight: bold;
+    color: #28a745;
+  }
+
+  /* Oval View Button */
+  .view-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px; /* Oval shape */
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+  }
+
+  .view-btn:hover {
+    background: #0056b3; /* Darker blue on hover */
+  }
+
+  .actions {
+    margin-left: 16px;
+  }
+/* Cue Card Styling for Homework (Row Style) */
+.homework-row {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 18px;
+  padding: 16px 0;
+  margin: 12px 0;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+}
+
+.cue-card {
+  background: var(--card-bg);
+  border: 1px solid #ddd;
+  border-radius: var(--radius);
+  padding: 16px;
+  min-width: 300px; /* Fixed width for each card in row */
+  flex: 0 0 auto; /* Prevent shrinking */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(135deg, #fefefe 0%, #f0f0f0 100%); /* Subtle cue card gradient */
+}
+
+.cue-card-header {
+  background: var(--blue);
+  color: white;
+  padding: 8px;
+  border-radius: 8px 8px 0 0;
+  margin: -16px -16px 12px -16px; /* Overlap border for header */
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cue-card-content {
+  padding: 0;
+  color: #111;
+  line-height: 1.5;
+}
+
+.cue-card-content p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.cue-card-content .meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cue-card-content .meta span {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cue-card-content .status.expired {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.cue-card-content .status.active {
+  color: #28a745;
+  font-weight: 600;
+}
+
+/* Oval View Button */
+.view-btn {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px; /* Oval shape */
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease;
+  display: block;
+  margin-top: 12px;
+  width: 100%; /* Full width within card */
+}
+
+.view-btn:hover {
+  background: #0056b3; /* Darker blue on hover */
+}
+
+/* Existing Cue Card Styles (Keep these) */
+.homework-row {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 18px;
+  padding: 16px 0;
+  margin: 12px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cue-card {
+  background: var(--card-bg);
+  border: 1px solid #ddd;
+  border-radius: var(--radius);
+  padding: 16px;
+  min-width: 300px;
+  flex: 0 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(135deg, #fefefe 0%, #f0f0f0 100%);
+}
+
+.cue-card-header {
+  background: var(--blue);
+  color: white;
+  padding: 8px;
+  border-radius: 8px 8px 0 0;
+  margin: -16px -16px 12px -16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cue-card-content {
+  padding: 0;
+  color: #111;
+  line-height: 1.5;
+}
+
+.cue-card-content p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.cue-card-content .meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cue-card-content .meta span {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cue-card-content .status.expired {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.cue-card-content .status.active {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.view-btn {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease;
+  display: block;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.view-btn:hover {
+  background: #0056b3;
+}
+
+/* New Styles for Expanded View */
+.cue-card.expanded {
+  min-width: 100%; /* Full width when expanded */
+  max-width: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1000;
+  padding: 40px;
+  overflow-y: auto;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: var(--card-bg);
+}
+
+.back-btn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 12px;
+  display: block;
+  width: 100px;
+}
+
+.back-btn:hover {
+  background: #4b5563;
+}
+
+.attachments {
+  margin-top: 16px;
+}
+
+.attachments a {
+  display: block;
+  color: var(--blue);
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+.attachments a:hover {
+  text-decoration: underline;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Cue Card Grid Layout (3 Columns, Wrapping Rows) */
+.homework-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 cards per row */
+  gap: 18px;
+  padding: 16px 0;
+  margin: 12px 0;
+}
+
+.cue-card {
+  background: var(--card-bg);
+  border: 1px solid #ddd;
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(135deg, #fefefe 0%, #f0f0f0 100%); /* Subtle cue card gradient */
+}
+
+/* Responsive: 2 columns on medium screens, 1 on small */
+@media (max-width: 900px) {
+  .homework-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .homework-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.back-btn {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 12px;
+  display: block;
+  width: 100px;
+}
+
+.back-btn:hover {
+  background: #0056b3;
+}
+
+.attachments {
+  margin-top: 10px;
+}
+
+.file-preview {
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.file-preview img {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.primary-btn {
+  background: #007bff;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+.primary-btn:hover {
+  background: #0056b3;
+}
