@@ -660,14 +660,15 @@ async function renderStudentHomeworks(user) {
 }
 
 // === Expand Homework ===
+// === Expand Homework ===
 function expandHomework(card) {
-  collapseHomework(); // Collapse any previously expanded
+  collapseHomework(); // collapse any previously expanded card
 
-  card.classList.add("expanded");
+  card.classList.add('expanded');
 
   // Hide other cards
   document.querySelectorAll('.cue-card').forEach(c => {
-    if(c !== card) c.classList.add('hidden');
+    if (c !== card) c.classList.add('hidden');
   });
 
   const fullDesc = card.dataset.desc;
@@ -678,35 +679,18 @@ function expandHomework(card) {
     console.error("Failed to parse attachments:", e);
   }
 
-  const container = card.querySelector(".attachmentsContainer");
-  container.innerHTML = '';
-
-  if (attachments.length > 0) {
-    attachments.forEach(file => {
-      const link = document.createElement('a');
-      link.href = file.url;
-      link.target = "_blank";
-      link.textContent = file.filename;
-      link.style.display = "block";
-      container.appendChild(link);
-    });
-  } else {
-    container.innerHTML = '<p>No attachments</p>';
-  }
-
-  // Replace content with full description + Back button
   const contentEl = card.querySelector(".cue-card-content");
   const metaEl = contentEl.querySelector(".meta").outerHTML;
+
+  // Replace content with full description + Back button + attachments
   contentEl.innerHTML = `
     <p>${fullDesc}</p>
     ${metaEl}
     <div class="attachmentsContainer" style="margin-top:10px;"></div>
     <button class="back-btn">← Back</button>
   `;
-  const backBtn = contentEl.querySelector(".back-btn");
-  backBtn.addEventListener("click", collapseHomework);
 
-  // Re-add attachments
+  // Render attachments only in expanded view
   const attachmentsContainer = contentEl.querySelector(".attachmentsContainer");
   if (attachments.length > 0) {
     attachments.forEach(file => {
@@ -720,6 +704,10 @@ function expandHomework(card) {
   } else {
     attachmentsContainer.innerHTML = '<p>No attachments</p>';
   }
+
+  // Back button collapses the card
+  const backBtn = contentEl.querySelector(".back-btn");
+  backBtn.addEventListener("click", () => collapseHomework());
 }
 
 // === Collapse Homework ===
@@ -728,21 +716,20 @@ function collapseHomework() {
   if (!expandedCard) return;
 
   expandedCard.classList.remove('expanded');
+
+  // Show all other cards
   document.querySelectorAll('.cue-card').forEach(c => c.classList.remove('hidden'));
 
-  // Re-render original card content
   const desc = expandedCard.dataset.desc;
-  const attachmentsSafe = expandedCard.dataset.attachments;
-  const attachments = JSON.parse(decodeURIComponent(attachmentsSafe));
-
   const contentEl = expandedCard.querySelector(".cue-card-content");
   const dueTxt = expandedCard.querySelector('.meta span:nth-child(2)').textContent;
   const statusEl = expandedCard.querySelector('.status');
   const statusClass = statusEl.classList.contains('expired') ? 'expired' : 'active';
   const statusText = statusEl.textContent;
 
+  // Restore preview content (no attachments)
   contentEl.innerHTML = `
-    <p>${desc.substring(0,100)}...</p>
+    <p>${desc.substring(0, 100)}...</p>
     <div class="meta">
       <span><strong>Group:</strong> Intensive Masters</span>
       <span><strong>Due:</strong> ${dueTxt}</span>
@@ -753,24 +740,11 @@ function collapseHomework() {
   `;
 
   // Reattach click for View button
-  contentEl.querySelector('.view-btn').addEventListener('click', e => {
+  contentEl.querySelector('.view-btn').addEventListener('click', () => {
     expandHomework(expandedCard);
   });
+}
 
-  // Reattach attachments
-  const attachmentsContainer = contentEl.querySelector(".attachmentsContainer");
-  if (attachments.length > 0) {
-    attachments.forEach(file => {
-      const link = document.createElement('a');
-      link.href = file.url;
-      link.target = "_blank";
-      link.textContent = file.filename;
-      link.style.display = "block";
-      attachmentsContainer.appendChild(link);
-    });
-  } else {
-    attachmentsContainer.innerHTML = '<p>No attachments</p>';
-  }
 }
 
   // === Render Student Tests ===
