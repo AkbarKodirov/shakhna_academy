@@ -571,20 +571,19 @@ async function renderStudentHomeworks(user) {
 
   container.innerHTML = "<p>Loading homeworks...</p>";
 
-  const groupId = user.fields.groupId?.[0];
+  const groupId = user.fields.Group?.[0];
   if (!groupId) {
     container.innerHTML = `<p>No group linked to your account</p>`;
     return;
   }
 
   try {
-    // Fetch group data
+    // 1. Fetch all homeworks assigned to this group
     const groupRes = await fetch(
       `https://api.airtable.com/v0/${window.SH_CONFIG.AIRTABLE_BASE_ID}/${window.SH_CONFIG.GROUPS_TABLE}/${groupId}`,
       { headers: { Authorization: `Bearer ${window.SH_CONFIG.AIRTABLE_TOKEN}` } }
     );
-
-    if (!groupRes.ok) throw new Error(`Failed to fetch group: ${groupRes.status}`);
+    if (!groupRes.ok) throw new Error("Failed to fetch group data");
     const groupData = await groupRes.json();
 
     const homeworkIds = groupData.fields.Homeworks || [];
@@ -593,7 +592,6 @@ async function renderStudentHomeworks(user) {
       return;
     }
 
-    // Fetch all homework records
     const homeworkRecords = await Promise.all(
       homeworkIds.map(async id => {
         const res = await fetch(
@@ -611,8 +609,8 @@ async function renderStudentHomeworks(user) {
       return;
     }
 
-    // Sort by due date (newest first)
-    homeworks.sort((a,b) => new Date(b.fields["Due Date"]) - new Date(a.fields["Due Date"]));
+    // Sort homeworks by due date (newest first)
+    homeworks.sort((a, b) => new Date(b.fields["Due Date"]) - new Date(a.fields["Due Date"]));
 
     const today = new Date();
 
@@ -630,14 +628,13 @@ async function renderStudentHomeworks(user) {
             <div class="cue-card" data-hwid="${hw.id}" data-desc="${hw.fields.Description || 'No full description'}" data-attachments="${attachmentsSafe}">
               <div class="cue-card-header">${hw.fields.Title || "Untitled Homework"}</div>
               <div class="cue-card-content">
-                <p>${(hw.fields.Description || "No details provided").substring(0,100)}...</p>
+                <p>${(hw.fields.Description || "No details provided").substring(0, 100)}...</p>
                 <div class="meta">
                   <span><strong>Group:</strong> Intensive Masters</span>
                   <span><strong>Due:</strong> ${dueTxt}</span>
                   <span class="status ${isExpired ? 'expired' : 'active'}">${isExpired ? 'Overdue' : 'Active'}</span>
                 </div>
                 <button class="view-btn">View</button>
-                <div class="attachmentsContainer" style="margin-top:10px;"></div>
               </div>
             </div>
           `;
@@ -645,7 +642,7 @@ async function renderStudentHomeworks(user) {
       </div>
     `;
 
-    // Add click listeners for View buttons
+    // Add click listener for View buttons
     container.querySelectorAll(".cue-card .view-btn").forEach(btn => {
       btn.addEventListener("click", e => {
         const card = e.target.closest(".cue-card");
@@ -655,60 +652,36 @@ async function renderStudentHomeworks(user) {
 
   } catch (err) {
     console.error("❌ Error loading homeworks:", err);
-    container.innerHTML = `<p style='color:red;'>Failed to load homeworks</p>`;
+    container.innerHTML = `<p style="color:red;">Failed to load homeworks</p>`;
   }
 }
 
-// === Expand Homework ===
+// Expand homework card
 function expandHomework(card) {
-  collapseHomework(); // Collapse any previously expanded
-
-  card.classList.add("expanded");
+  collapseHomework(); // collapse any other expanded card
+  card.classList.add('expanded');
 
   // Hide other cards
   document.querySelectorAll('.cue-card').forEach(c => {
-    if(c !== card) c.classList.add('hidden');
+    if (c !== card) c.classList.add('hidden');
   });
 
-  const fullDesc = card.dataset.desc;
-  let attachments = [];
-  try {
-    attachments = JSON.parse(decodeURIComponent(card.dataset.attachments));
-  } catch(e) {
-    console.error("Failed to parse attachments:", e);
-  }
-
-  const container = card.querySelector(".attachmentsContainer");
-  container.innerHTML = '';
-
-  if (attachments.length > 0) {
-    attachments.forEach(file => {
-      const link = document.createElement('a');
-      link.href = file.url;
-      link.target = "_blank";
-      link.textContent = file.filename;
-      link.style.display = "block";
-      container.appendChild(link);
-    });
-  } else {
-    container.innerHTML = '<p>No attachments</p>';
-  }
-
-  // Replace content with full description + Back button
   const contentEl = card.querySelector(".cue-card-content");
   const metaEl = contentEl.querySelector(".meta").outerHTML;
+  const fullDesc = card.dataset.desc;
+  let attachments = [];
+  try { attachments = JSON.parse(decodeURIComponent(card.dataset.attachments)); } catch(e) {}
+
   contentEl.innerHTML = `
     <p>${fullDesc}</p>
     ${metaEl}
     <div class="attachmentsContainer" style="margin-top:10px;"></div>
     <button class="back-btn">← Back</button>
   `;
-  const backBtn = contentEl.querySelector(".back-btn");
-  backBtn.addEventListener("click", collapseHomework);
 
-  // Re-add attachments
+  // Render attachments only in expanded view
   const attachmentsContainer = contentEl.querySelector(".attachmentsContainer");
-  if (attachments.length > 0) {
+  if (attachments.length) {
     attachments.forEach(file => {
       const link = document.createElement('a');
       link.href = file.url;
@@ -718,60 +691,43 @@ function expandHomework(card) {
       attachmentsContainer.appendChild(link);
     });
   } else {
-    attachmentsContainer.innerHTML = '<p>No attachments</p>';
+    attachmentsContainer.innerHTML = "<p>No attachments</p>";
   }
+
+  contentEl.querySelector(".back-btn").addEventListener("click", collapseHomework);
 }
 
-// === Collapse Homework ===
+// Collapse homework card
 function collapseHomework() {
-  const expandedCard = document.querySelector('.cue-card.expanded');
+  const expandedCard = document.querySelector(".cue-card.expanded");
   if (!expandedCard) return;
 
   expandedCard.classList.remove('expanded');
-  document.querySelectorAll('.cue-card').forEach(c => c.classList.remove('hidden'));
 
-  // Re-render original card content
-  const desc = expandedCard.dataset.desc;
-  const attachmentsSafe = expandedCard.dataset.attachments;
-  const attachments = JSON.parse(decodeURIComponent(attachmentsSafe));
+  // Show all other cards
+  document.querySelectorAll(".cue-card").forEach(c => c.classList.remove('hidden'));
 
+  // Restore preview
   const contentEl = expandedCard.querySelector(".cue-card-content");
-  const dueTxt = expandedCard.querySelector('.meta span:nth-child(2)').textContent;
-  const statusEl = expandedCard.querySelector('.status');
-  const statusClass = statusEl.classList.contains('expired') ? 'expired' : 'active';
-  const statusText = statusEl.textContent;
+  const desc = expandedCard.dataset.desc;
+  const dueTxt = contentEl.querySelector(".meta span:nth-child(2)")?.textContent || '-';
+  const statusEl = contentEl.querySelector(".status");
+  const statusClass = statusEl?.classList.contains("expired") ? "expired" : "active";
+  const statusText = statusEl?.textContent || "Active";
 
   contentEl.innerHTML = `
-    <p>${desc.substring(0,100)}...</p>
+    <p>${desc.substring(0, 100)}...</p>
     <div class="meta">
       <span><strong>Group:</strong> Intensive Masters</span>
       <span><strong>Due:</strong> ${dueTxt}</span>
       <span class="status ${statusClass}">${statusText}</span>
     </div>
     <button class="view-btn">View</button>
-    <div class="attachmentsContainer" style="margin-top:10px;"></div>
   `;
 
-  // Reattach click for View button
-  contentEl.querySelector('.view-btn').addEventListener('click', e => {
-    expandHomework(expandedCard);
-  });
-
-  // Reattach attachments
-  const attachmentsContainer = contentEl.querySelector(".attachmentsContainer");
-  if (attachments.length > 0) {
-    attachments.forEach(file => {
-      const link = document.createElement('a');
-      link.href = file.url;
-      link.target = "_blank";
-      link.textContent = file.filename;
-      link.style.display = "block";
-      attachmentsContainer.appendChild(link);
-    });
-  } else {
-    attachmentsContainer.innerHTML = '<p>No attachments</p>';
-  }
+  contentEl.querySelector(".view-btn").addEventListener("click", () => expandHomework(expandedCard));
 }
+
 
   // === Render Student Tests ===
   async function renderStudentTests(user) {
